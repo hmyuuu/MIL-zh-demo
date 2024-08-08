@@ -1,7 +1,7 @@
 site_name: Lean中的数学
 repo_url: https://github.com/hmyuuu/MIL-zh-demo
 repo_name: MIL-zh-demo
-docs_dir: "./MIL"
+docs_dir: "./src"
 
 theme:
   name: material
