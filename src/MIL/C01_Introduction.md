@@ -147,7 +147,6 @@ theorem hard : FermatLastTheorem :=
 #check hard
 ```
 
-/- TEXT:
 If you manage to construct an expression of type `FermatLastTheorem` and
 Lean accepts it as a term of that type,
 you have done something very impressive.
