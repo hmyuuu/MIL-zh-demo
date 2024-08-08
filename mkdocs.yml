@@ -67,4 +67,6 @@ extra:
 
 nav:
   - 主页: index.md
-  - Introduction: ./MIL/C01_Introduction.md
+  - MIL:
+      - Introduction: C01_Introduction.md
+      - Basics: C02_Basics.md
