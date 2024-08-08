@@ -66,4 +66,5 @@ extra:
     alias: true
 
 nav:
-  - 简介: C01_Introduction.md
+  - 主页: index.md
+  - Introduction: ./MIL/C01_Introduction.md
