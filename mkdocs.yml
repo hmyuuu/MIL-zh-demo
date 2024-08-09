@@ -25,6 +25,16 @@ plugins:
       lang: zh
   - minify:
       minify_html: true
+      docs_structure: folder
+  - i18n:
+      languages:
+        - locale: en
+          name: English
+          build: true
+        - locale: zh
+          name: 中文
+          default: true
+          build: true
 
 markdown_extensions:
   - admonition
@@ -66,6 +76,6 @@ extra:
     alias: true
 
 nav:
-  - 主页: index.md
+  - 目录: index.md
   - Introduction: ./MIL/C01_Introduction.md
   - Basics: ./MIL/C02_Basics.md

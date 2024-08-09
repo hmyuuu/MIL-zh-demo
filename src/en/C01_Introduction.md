@@ -36,19 +36,19 @@ running Lean from inside the VS Code editor.
 To get started:
 
 1. Install Lean 4 and VS Code following
-   these [installation instructions](https://leanprover-community.github.io/get_started.html).
+   these [installation instructions](https://leanprover-community.github.io/get*started.html).
 
 2. Make sure you have [git](https://git-scm.com/) installed.
 
 3. Follow these [instructions](https://leanprover-community.github.io/install/project.html#working-on-an-existing-project)
-   to fetch the `mathematics_in_lean` repository and open it up in VS Code.
+   to fetch the `mathematics*in*lean` repository and open it up in VS Code.
 
 4. Each section in this book has an associated Lean file with examples and exercises.
    You can find them in the folder `MIL`, organized by chapter.
    We strongly recommend making a copy of that folder and experimenting and doing the
    exercises in that copy.
    This leaves the originals intact, and it also makes it easier to update the repository as it changes (see below).
-   You can call the copy `my_files` or whatever you want and use it to create
+   You can call the copy `my*files` or whatever you want and use it to create
    your own Lean files as well.
 
 At that point, you can open the textbook in a side panel in VS Code as follows:
@@ -64,13 +64,13 @@ At that point, you can open the textbook in a side panel in VS Code as follows:
 Alternatively, you can run Lean and VS Code in the cloud,
 using [Gitpod](https://gitpod.io/).
 You can find instructions as to how to do that on the Mathematics in Lean
-[project page](https://github.com/leanprover-community/mathematics_in_lean)
+[project page](https://github.com/leanprover-community/mathematics*in*lean)
 on Github. We still recommend working in a copy of the `MIL` folder,
 as described above.
 
 This textbook and the associated repository are still a work in progress.
 You can update the repository by typing `git pull`
-followed by `lake exe cache get` inside the `mathematics_in_lean` folder.
+followed by `lake exe cache get` inside the `mathematics*in*lean` folder.
 (This assumes that you have not changed the contents of the `MIL` folder,
 which is why we suggested making a copy.)
 
@@ -127,7 +127,7 @@ These are mathematical statements.
 #check 2 + 2 = 4
 
 def FermatLastTheorem :=
-  ∀ x y z n : ℕ, n > 2 ∧ x _ y _ z ≠ 0 → x ^ n + y ^ n ≠ z ^ n
+  ∀ x y z n : ℕ, n > 2 ∧ x * y * z ≠ 0 → x ^ n + y ^ n ≠ z ^ n
 
 #check FermatLastTheorem
 ```
@@ -155,7 +155,7 @@ So now you know the game.
 All that is left to learn are the rules.
 
 This book is complementary to a companion tutorial,
-[Theorem Proving in Lean](https://leanprover.github.io/theorem_proving_in_lean4/),
+[Theorem Proving in Lean](https://leanprover.github.io/theorem*proving*in*lean4/),
 which provides a more thorough introduction to the underlying logical framework
 and core syntax of Lean.
 _Theorem Proving in Lean_ is for people who prefer to read a user manual cover to cover before
@@ -177,16 +177,16 @@ For example, the following expression represents a proof of the fact that
 if `n` is even then so is `m * n`:
 
 ```lean
-example : ∀ m n : Nat, Even n → Even (m _ n) := fun m n ⟨k, (hk : n = k + k)⟩ ↦
-  have hmn : m _ n = m _ k + m _ k := by rw [hk, mul_add]
-  show ∃ l, m \* n = l + l from ⟨\_, hmn⟩
+example : ∀ m n : Nat, Even n → Even (m * n) := fun m n ⟨k, (hk : n = k + k)⟩ ↦
+  have hmn : m * n = m * k + m * k := by rw [hk, mul*add]
+  show ∃ l, m \* n = l + l from ⟨\*, hmn⟩
 ```
 
 The _proof term_ can be compressed to a single line:
 
 ```lean
-example : ∀ m n : Nat, Even n → Even (m _ n) :=
-fun m n ⟨k, hk⟩ ↦ ⟨m _ k, by rw [hk, mul_add]⟩
+example : ∀ m n : Nat, Even n → Even (m * n) :=
+fun m n ⟨k, hk⟩ ↦ ⟨m * k, by rw [hk, mul*add]⟩
 ```
 
 The following is, instead, a _tactic-style_ proof of the same theorem, where lines
@@ -229,7 +229,7 @@ tactic proofs are often easier and quicker to write than
 proof terms.
 There isn't a sharp distinction between the two:
 tactic proofs can be inserted in proof terms,
-as we did with the phrase `by rw [hk, mul_add]` in the example above.
+as we did with the phrase `by rw [hk, mul*add]` in the example above.
 We will also see that, conversely,
 it is often useful to insert a short proof term in the middle of a tactic proof.
 That said, in this book, our emphasis will be on the use of tactics.
@@ -237,8 +237,8 @@ That said, in this book, our emphasis will be on the use of tactics.
 In our example, the tactic proof can also be reduced to a one-liner:
 
 ```lean
-example : ∀ m n : Nat, Even n → Even (m _ n) := by
-  rintro m n ⟨k, hk⟩; use m _ k; rw [hk]; ring
+example : ∀ m n : Nat, Even n → Even (m * n) := by
+  rintro m n ⟨k, hk⟩; use m * k; rw [hk]; ring
 ```
 
 Here we have used tactics to carry out small proof steps.
@@ -249,8 +249,8 @@ specific rules for simplifying statements about parity to
 prove our theorem automatically.
 
 ```lean
-example : ∀ m n : Nat, Even n → Even (m _ n) := by
-  intros; simp [_, parity_simps]
+example : ∀ m n : Nat, Even n → Even (m * n) := by
+  intros; simp [*, parity*simps]
 ```
 
 Another big difference between the two introductions is that
