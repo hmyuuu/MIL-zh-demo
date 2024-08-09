@@ -519,7 +519,7 @@ But notice that explicitly writing `a`, `b`, and `c`
 is redundant, because the hypothesis `h` makes it clear that
 those are the objects we have in mind.
 In this case, typing a few extra characters is not onerous,
-but if we wanted to apply `add_left*cancel` to more complicated expressions,
+but if we wanted to apply `add_left_cancel` to more complicated expressions,
 writing them would be tedious.
 In cases like these,
 Lean allows us to mark arguments as _implicit_,
@@ -533,10 +533,10 @@ To illustrate, let us show that `a * 0 = 0`
 follows from the ring axioms.
 
 ```lean
-theorem mul_zero (a : R) : a \* 0 = 0 := by
-have h : a * 0 + a \_ 0 = a \* 0 + 0 := by
+theorem mul_zero (a : R) : a * 0 = 0 := by
+have h : a * 0 + a * 0 = a * 0 + 0 := by
 rw [← mul_add, add_zero, add_zero]
-rw [add_left*cancel h]
+rw [add_left_cancel h]
 ```
 
 We have used a new trick!
@@ -677,7 +677,7 @@ additive version (and also their abelian variants,
 ```lean
 variable {G : Type*} [Group G]
 
-rcheck (mul*assoc : ∀ a b c : G, a * b * c = a * (b * c))
+rcheck (mul_assoc : ∀ a b c : G, a * b * c = a * (b * c))
 #check (one_mul : ∀ a : G, 1 * a = a)
 #check (mul_left_inv : ∀ a : G, a⁻¹ * a = 1)
 ```
@@ -689,43 +689,21 @@ The proofs we have carried out in this section provide some hints.
 
 ```lean
 theorem mul_right_inv (a : G) : a \* a⁻¹ = 1 := by
-sorry
+  sorry
 
-theorem mul\*one\_ (a : G) : a \* 1 = a := by
-sorry
+theorem mul_one (a : G) : a * 1 = a := by
+  sorry
 
-theorem mul_inv\*rev (a b : G) : (a \* b)⁻¹ = b⁻¹ \* a⁻¹ := by
-sorry
+theorem mul_inv_rev (a b : G) : (a * b)⁻¹ = b⁻¹ * a⁻¹ := by
+  sorry
 ```
-
--- SOLUTIONS:
-theorem mul*right_invαα (a : G) : a \* a⁻¹ = 1 := by
-have h : (a * a⁻¹)⁻¹ _ (a \_ a⁻¹ * (a \* a⁻¹)) = 1 := by
-rw [mul_assoc, ← mul_assoc a⁻¹ a, mul_left*inv, one_*mul, mul_left*inv]
-rw [← h, ← mul_assoc, mul_left*inv, one_*mul]
-
-theorem mul*one*αα (a : G) : a \* 1 = a := by
-rw [← mul_left*inv a, ← mul_assoc, mul_right_inv, one_*mul]
-
-theorem mul*inv*revαα (a b : G) : (a _ b)⁻¹ = b⁻¹ \* a⁻¹ := by
-rw [← one\_\_mul (b⁻¹ _ a⁻¹), ← mul*left*inv (a _ b), mul_assoc, mul_assoc, ← mul_assoc b b⁻¹,
-mul_right_inv, one_\*mul, mul*right_inv, mul\*one*]
-
--- BOTH:
-end MyGroup
-
-end
-
-/- TEXT:
-.. index:: group (tactic), tactics ; group, tactics ; noncomm\*ring, tactics ; abel
 
 Explicitly invoking those lemmas is tedious, so Mathlib provides
 tactics similar to `ring` in order to cover most uses: `group`
 is for non-commutative multiplicative groups, `abel` for abelian
-additive groups, and `noncomm*ring` for non-commutative rings.
+additive groups, and `noncomm_ring` for non-commutative rings.
 It may seem odd that the algebraic structures are called
 `Ring` and `CommRing` while the tactics are named
-`noncomm*ring` and `ring`. This is partly for historical reasons,
+`noncomm_ring` and `ring`. This is partly for historical reasons,
 but also for the convenience of using a shorter name for the
 tactic that deals with commutative rings, since it is used more often.
-TEXT. -/
