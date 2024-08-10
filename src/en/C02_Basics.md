@@ -707,3 +707,549 @@ It may seem odd that the algebraic structures are called
 `noncomm_ring` and `ring`. This is partly for historical reasons,
 but also for the convenience of using a shorter name for the
 tactic that deals with commutative rings, since it is used more often.
+
+## Using Theorems and Lemmas
+
+<!-- TODO:fix numref -->
+
+Rewriting is great for proving equations,
+but what about other sorts of theorems?
+For example, how can we prove an inequality,
+like the fact that :math:`a + e^b \le a + e^c` holds whenever :math:`b \le c`?
+We have already seen that theorems can be applied to arguments and hypotheses,
+and that the `apply` and `exact` tactics can be used to solve goals.
+In this section, we will make good use of these tools.
+
+Consider the library theorems `le_refl` and `le_trans`:
+
+```lean
+#check (le_refl : ∀ a : ℝ, a ≤ a)
+#check (le_trans : a ≤ b → b ≤ c → a ≤ c)
+```
+
+As we explain in more detail in :numref:`implication_and_the_universal_quantifier`,
+the implicit parentheses in the statement of `le_trans`
+associate to the right, so it should be interpreted as `a ≤ b → (b ≤ c → a ≤ c)`.
+The library designers have set the arguments `a`, `b` and `c` to `le_trans` implicit,
+so that Lean will _not_ let you provide them explicitly (unless you
+really insist, as we will discuss later).
+Rather, it expects to infer them from the context in which they are used.
+For example, when hypotheses `h : a ≤ b` and `h' : b ≤ c`
+are in the context,
+all the following work:
+
+```lean
+variable (h : a ≤ b) (h' : b ≤ c)
+
+#check (le_refl : ∀ a : Real, a ≤ a)
+#check (le_refl a : a ≤ a)
+#check (le_trans : a ≤ b → b ≤ c → a ≤ c)
+#check (le_trans h : b ≤ c → a ≤ c)
+#check (le_trans h h' : a ≤ c)
+```
+
+The `apply` tactic takes a proof of a general statement or implication,
+tries to match the conclusion with the current goal,
+and leaves the hypotheses, if any, as new goals.
+If the given proof matches the goal exactly
+(modulo _definitional_ equality),
+you can use the `exact` tactic instead of `apply`.
+So, all of these work:
+
+```lean
+example (x y z : ℝ) (h₀ : x ≤ y) (h₁ : y ≤ z) : x ≤ z := by
+  apply le_trans
+    apply h₀
+    apply h₁
+
+example (x y z : ℝ) (h₀ : x ≤ y) (h₁ : y ≤ z) : x ≤ z := by
+  apply le_trans h₀
+  apply h₁
+
+example (x y z : ℝ) (h₀ : x ≤ y) (h₁ : y ≤ z) : x ≤ z :=
+  le_trans h₀ h₁
+
+example (x : ℝ) : x ≤ x := by
+  apply le_refl
+
+example (x : ℝ) : x ≤ x :=
+  le_refl x
+```
+
+In the first example, applying `le_trans`
+creates two goals,
+and we use the dots to indicate where the proof of each begins.
+The dots are optional, but they serve to _focus_ the goal:
+within the block introduced by the dot, only one goal is visible,
+and it must be completed before the end of the block.
+Here we end the first block by starting a new one with another dot.
+We could just as well have decreased the indentation.
+In the fourth example and in the last example,
+we avoid going into tactic mode entirely:
+`le_trans h₀ h₁` and `le_refl x` are the proof terms we need.
+
+Here are a few more library theorems:
+
+```lean
+#check (le_refl : ∀ a, a ≤ a)
+#check (le_trans : a ≤ b → b ≤ c → a ≤ c)
+#check (lt_of_le_of_lt : a ≤ b → b < c → a < c)
+#check (lt_of_lt_of_le : a < b → b ≤ c → a < c)
+#check (lt_trans : a < b → b < c → a < c)
+```
+
+Use them together with `apply` and `exact` to prove the following:
+
+```lean
+example (h₀ : a ≤ b) (h₁ : b < c) (h₂ : c ≤ d) (h₃ : d < e) : a < e := by
+  sorry
+```
+
+In fact, Lean has a tactic that does this sort of thing automatically:
+
+```lean
+example (h₀ : a ≤ b) (h₁ : b < c) (h₂ : c ≤ d) (h₃ : d < e) : a < e := by
+  linarith
+```
+
+The `linarith` tactic is designed to handle _linear arithmetic_.
+
+```lean
+example (h : 2 * a ≤ 3 * b) (h' : 1 ≤ a) (h'' : d = 2) : d + a ≤ 5 * b := by
+  linarith
+```
+
+In addition to equations and inequalities in the context,
+`linarith` will use additional inequalities that you pass as arguments.
+In the next example, `exp_le_exp.mpr h'` is a proof of
+`exp b ≤ exp c`, as we will explain in a moment.
+Notice that, in Lean, we write `f x` to denote the application
+of a function `f` to the argument `x`,
+exactly the same way we write `h x` to denote the result of
+applying a fact or theorem `h` to the argument `x`.
+Parentheses are only needed for compound arguments,
+as in `f (x + y)`. Without the parentheses, `f x + y`
+would be parsed as `(f x) + y`.
+
+```lean
+example (h : 1 ≤ a) (h' : b ≤ c) : 2 + a + exp b ≤ 3 * a + exp c := by
+  linarith [exp_le_exp.mpr h']
+```
+
+Here are some more theorems in the library that can be used to establish
+inequalities on the real numbers.
+
+```lean
+#check (exp_le_exp : exp a ≤ exp b ↔ a ≤ b)
+#check (exp_lt_exp : exp a < exp b ↔ a < b)
+#check (log_le_log : 0 < a → a ≤ b → log a ≤ log b)
+#check (log_lt_log : 0 < a → a < b → log a < log b)
+#check (add_le_add : a ≤ b → c ≤ d → a + c ≤ b + d)
+#check (add_le_add_left : a ≤ b → ∀ c, c + a ≤ c + b)
+#check (add_le_add_right : a ≤ b → ∀ c, a + c ≤ b + c)
+#check (add_lt_add_of_le_of_lt : a ≤ b → c < d → a + c < b + d)
+#check (add_lt_add_of_lt_of_le : a < b → c ≤ d → a + c < b + d)
+#check (add_lt_add_left : a < b → ∀ c, c + a < c + b)
+#check (add_lt_add_right : a < b → ∀ c, a + c < b + c)
+#check (add_nonneg : 0 ≤ a → 0 ≤ b → 0 ≤ a + b)
+#check (add_pos : 0 < a → 0 < b → 0 < a + b)
+#check (add_pos_of_pos_of_nonneg : 0 < a → 0 ≤ b → 0 < a + b)
+#check (exp_pos : ∀ a, 0 < exp a)
+#check add_le_add_left
+```
+
+Some of the theorems, `exp_le_exp`, `exp_lt_exp`
+use a _bi-implication_, which represents the
+phrase "if and only if."
+(You can type it in VS Code with `\lr` of `\iff`).
+We will discuss this connective in greater detail in the next chapter.
+Such a theorem can be used with `rw` to rewrite a goal to
+an equivalent one:
+
+```lean
+example (h : a ≤ b) : exp a ≤ exp b := by
+  rw [exp_le_exp]
+  exact h
+```
+
+In this section, however, we will use the fact that if `h : A ↔ B`
+is such an equivalence,
+then `h.mp` establishes the forward direction, `A → B`,
+and `h.mpr` establishes the reverse direction, `B → A`.
+Here, `mp` stands for "modus ponens" and
+`mpr` stands for "modus ponens reverse."
+You can also use `h.1` and `h.2` for `h.mp` and `h.mpr`,
+respectively, if you prefer.
+Thus the following proof works:
+
+```lean
+example (h₀ : a ≤ b) (h₁ : c < d) : a + exp c + e < b + exp d + e := by
+  apply add_lt_add_of_lt_of_le
+  · apply add_lt_add_of_le_of_lt h₀
+    apply exp_lt_exp.mpr h₁
+  apply le_refl
+```
+
+The first line, `apply add_lt_add_of_lt_of_le`,
+creates two goals,
+and once again we use a dot to separate the
+proof of the first from the proof of the second.
+
+Try the following examples on your own.
+The example in the middle shows you that the `norm_num`
+tactic can be used to solve concrete numeric goals.
+
+```lean
+example (h₀ : d ≤ e) : c + exp (a + d) ≤ c + exp (a + e) := by sorry
+
+example : (0 : ℝ) < 1 := by norm_num
+
+example (h : a ≤ b) : log (1 + exp a) ≤ log (1 + exp b) := by
+  have h₀ : 0 < 1 + exp a := by sorry
+  apply log_le_log h₀
+  sorry
+```
+
+From these examples, it should be clear that being able to
+find the library theorems you need constitutes an important
+part of formalization.
+There are a number of strategies you can use:
+
+- You can browse Mathlib in its
+  [GitHub repository](https://github.com/leanprover-community/mathlib4).
+
+- You can use the API documentation on the Mathlib
+  [web pages](https://leanprover-community.github.io/mathlib4_docs).
+
+- You can rely on Mathlib naming conventions and Ctrl-space completion in
+  the editor to guess a theorem name (or Cmd-space on a Mac keyboard).
+  In Lean, a theorem named `A_of_B_of_C` establishes
+  something of the form `A` from hypotheses of the form `B` and `C`,
+  where `A`, `B`, and `C`
+  approximate the way we might read the goals out loud.
+  So a theorem establishing something like `x + y ≤ ...` will probably
+  start with `add_le`.
+  Typing `add_le` and hitting Ctrl-space will give you some helpful choices.
+  Note that hitting Ctrl-space twice displays more information about the available
+  completions.
+
+- If you right-click on an existing theorem name in VS Code,
+  the editor will show a menu with the option to
+  jump to the file where the theorem is defined,
+  and you can find similar theorems nearby.
+
+- You can use the `apply?` tactic,
+  which tries to find the relevant theorem in the library.
+
+```lean
+example : 0 ≤ a ^ 2 := by
+  -- apply?
+  exact sq_nonneg a
+```
+
+To try out `apply?` in this example,
+delete the `exact` command and uncomment the previous line.
+Using these tricks,
+see if you can find what you need to do the
+next example:
+
+```lean
+example (h : a ≤ b) : c - exp b ≤ c - exp a := by
+  sorry
+```
+
+Using the same tricks, confirm that `linarith` instead of `apply?`
+can also finish the job.
+
+Here is another example of an inequality:
+
+```lean
+example : 2 * a * b ≤ a ^ 2 + b ^ 2 := by
+  have h : 0 ≤ a ^ 2 - 2 * a * b + b ^ 2
+  calc
+    a ^ 2 - 2 * a * b + b ^ 2 = (a - b) ^ 2 := by ring
+    _ ≥ 0 := by apply pow_two_nonneg
+
+  calc
+    2 * a * b = 2 * a * b + 0 := by ring
+    _ ≤ 2 * a * b + (a ^ 2 - 2 * a * b + b ^ 2) := add_le_add (le_refl _) h
+    _ = a ^ 2 + b ^ 2 := by ring
+```
+
+Mathlib tends to put spaces around binary operations like `*` and `^`,
+but in this example, the more compressed format increases readability.
+There are a number of things worth noticing.
+First, an expression `s ≥ t` is definitionally equivalent to `t ≤ s`.
+In principle, this means one should be able to use them interchangeably.
+But some of Lean's automation does not recognize the equivalence,
+so Mathlib tends to favor `≤` over `≥`.
+Second, we have used the `ring` tactic extensively.
+It is a real timesaver!
+Finally, notice that in the second line of the
+second `calc` proof,
+instead of writing `by exact add_le_add (le_refl _) h`,
+we can simply write the proof term `add_le_add (le_refl _) h`.
+
+In fact, the only cleverness in the proof above is figuring
+out the hypothesis `h`.
+Once we have it, the second calculation involves only
+linear arithmetic, and `linarith` can handle it:
+
+```lean
+example : 2 * a * b ≤ a ^ 2 + b ^ 2 := by
+  have h : 0 ≤ a ^ 2 - 2 * a * b + b ^ 2
+  calc
+    a ^ 2 - 2 * a * b + b ^ 2 = (a - b) ^ 2 := by ring
+    _ ≥ 0 := by apply pow_two_nonneg
+  linarith
+```
+
+How nice! We challenge you to use these ideas to prove the
+following theorem. You can use the theorem `abs_le'.mpr`.
+You will also need the `constructor` tactic to split a conjunction
+to two goals; see :numref:`conjunction_and_biimplication`.
+
+```lean
+example : |a * b| ≤ (a ^ 2 + b ^ 2) / 2 := by
+  sorry
+
+#check abs_le'.mpr
+```
+
+If you managed to solve this, congratulations!
+You are well on your way to becoming a master formalizer.
+
+## More examples using apply and rw
+
+The `min` function on the real numbers is uniquely characterized
+by the following three facts:
+section
+
+```lean
+#check (min_le_left a b : min a b ≤ a)
+#check (min_le_right a b : min a b ≤ b)
+#check (le_min : c ≤ a → c ≤ b → c ≤ min a b)
+```
+
+Can you guess the names of the theorems that characterize
+`max` in a similar way?
+
+Notice that we have to apply `min` to a pair of arguments `a` and `b`
+by writing `min a b` rather than `min (a, b)`.
+Formally, `min` is a function of type `ℝ → ℝ → ℝ`.
+When we write a type like this with multiple arrows,
+the convention is that the implicit parentheses associate
+to the right, so the type is interpreted as `ℝ → (ℝ → ℝ)`.
+The net effect is that if `a` and `b` have type `ℝ`
+then `min a` has type `ℝ → ℝ` and
+`min a b` has type `ℝ`, so `min` acts like a function
+of two arguments, as we expect. Handling multiple
+arguments in this way is known as _currying_,
+after the logician Haskell Curry.
+
+The order of operations in Lean can also take some getting used to.
+Function application binds tighter than infix operations, so the
+expression `min a b + c` is interpreted as `(min a b) + c`.
+With time, these conventions will become second nature.
+
+Using the theorem `le_antisymm`, we can show that two
+real numbers are equal if each is less than or equal to the other.
+Using this and the facts above,
+we can show that `min` is commutative:
+
+```lean
+example : min a b = min b a := by
+  apply le_antisymm
+  · show min a b ≤ min b a
+    apply le_min
+    · apply min_le_right
+    apply min_le_left
+  · show min b a ≤ min a b
+    apply le_min
+    · apply min_le_right
+    apply min_le_left
+```
+
+Here we have used dots to separate proofs of
+different goals.
+Our usage is inconsistent:
+at the outer level,
+we use dots and indentation for both goals,
+whereas for the nested proofs,
+we use dots only until a single goal remains.
+Both conventions are reasonable and useful.
+We also use the `show` tactic to structure
+the proof
+and indicate what is being proved in each block.
+The proof still works without the `show` commands,
+but using them makes the proof easier to read and maintain.
+
+It may bother you that the proof is repetitive.
+To foreshadow skills you will learn later on,
+we note that one way to avoid the repetition
+is to state a local lemma and then use it:
+
+```lean
+example : min a b = min b a := by
+  have h : ∀ x y : ℝ, min x y ≤ min y x := by
+    intro x y
+    apply le_min
+    apply min_le_right
+    apply min_le_left
+  apply le_antisymm
+  apply h
+  apply h
+```
+
+We will say more about the universal quantifier in
+:numref:`implication_and_the_universal_quantifier`,
+but suffice it to say here that the hypothesis
+`h` says that the desired inequality holds for
+any `x` and `y`,
+and the `intro` tactic introduces an arbitrary
+`x` and `y` to establish the conclusion.
+The first `apply` after `le_antisymm` implicitly
+uses `h a b`, whereas the second one uses `h b a`.
+
+Another solution is to use the `repeat` tactic,
+which applies a tactic (or a block) as many times
+as it can.
+
+```lean
+example : min a b = min b a := by
+  apply le_antisymm
+  repeat
+    apply le_min
+    apply min_le_right
+    apply min_le_left
+```
+
+We encourage you to prove the following as exercises.
+You can use either of the tricks just described to shorten the first.
+
+```lean
+example : max a b = max b a := by
+  sorry
+example : min (min a b) c = min a (min b c) := by
+  sorry
+```
+
+Of course, you are welcome to prove the associativity of `max` as well.
+
+It is an interesting fact that `min` distributes over `max`
+the way that multiplication distributes over addition,
+and vice-versa.
+In other words, on the real numbers, we have the identity
+`min a (max b c) = max (min a b) (min a c)`
+as well as the corresponding version with `max` and `min`
+switched.
+But in the next section we will see that this does _not_ follow
+from the transitivity and reflexivity of `≤` and
+the characterizing properties of `min` and `max` enumerated above.
+We need to use the fact that `≤` on the real numbers is a _total order_,
+which is to say,
+it satisfies `∀ x y, x ≤ y ∨ y ≤ x`.
+Here the disjunction symbol, `∨`, represents "or".
+In the first case, we have `min x y = x`,
+and in the second case, we have `min x y = y`.
+We will learn how to reason by cases in :numref:`disjunction`,
+but for now we will stick to examples that don't require the case split.
+
+Here is one such example:
+
+```lean
+theorem aux : min a b + c ≤ min (a + c) (b + c) := by
+  sorry
+example : min a b + c = min (a + c) (b + c) := by
+  sorry
+```
+
+It is clear that `aux` provides one of the two inequalities
+needed to prove the equality,
+but applying it to suitable values yields the other direction
+as well.
+As a hint, you can use the theorem `add_neg_cancel_right`
+and the `linarith` tactic.
+
+Lean's naming convention is made manifest
+in the library's name for the triangle inequality:
+
+```lean
+#check (abs_add : ∀ a b : ℝ, |a + b| ≤ |a| + |b|)
+```
+
+Use it to prove the following variant, using also `add_sub_cancel_right`:
+
+```lean
+example : |a| - |b| ≤ |a - b| :=
+  sorry
+end
+```
+
+See if you can do this in three lines or less.
+You can use the theorem `sub_add_cancel`.
+
+Another important relation that we will make use of
+in the sections to come is the divisibility relation
+on the natural numbers, `x ∣ y`.
+Be careful: the divisibility symbol is _not_ the
+ordinary bar on your keyboard.
+Rather, it is a unicode character obtained by
+typing `\|` in VS Code.
+By convention, Mathlib uses `dvd`
+to refer to it in theorem names.
+
+```lean
+example (h₀ : x ∣ y) (h₁ : y ∣ z) : x ∣ z :=
+  dvd_trans h₀ h₁
+
+example : x ∣ y * x * z := by
+  apply dvd_mul_of_dvd_left
+  apply dvd_mul_left
+
+example : x ∣ x ^ 2 := by
+  apply dvd_mul_left
+```
+
+In the last example, the exponent is a natural
+number, and applying `dvd_mul_left`
+forces Lean to expand the definition of `x^2` to
+`x^1 * x`.
+See if you can guess the names of the theorems
+you need to prove the following:
+
+```lean
+example (h : x ∣ w) : x ∣ y * (x * z) + x ^ 2 + w ^ 2 := by
+  sorry
+end
+```
+
+With respect to divisibility, the _greatest common divisor_,
+`gcd`, and least common multiple, `lcm`,
+are analogous to `min` and `max`.
+Since every number divides `0`,
+`0` is really the greatest element with respect to divisibility:
+
+```lean
+variable (m n : ℕ)
+
+#check (Nat.gcd_zero_right n : Nat.gcd n 0 = n)
+#check (Nat.gcd_zero_left n : Nat.gcd 0 n = n)
+#check (Nat.lcm_zero_right n : Nat.lcm n 0 = 0)
+#check (Nat.lcm_zero_left n : Nat.lcm 0 n = 0)
+```
+
+See if you can guess the names of the theorems you will need to
+prove the following:
+
+```lean
+example : Nat.gcd m n = Nat.gcd n m := by
+  sorry
+```
+
+Hint: you can use `dvd_antisymm`, but if you do, Lean will
+complain that the expression is ambiguous between the generic
+theorem and the version `Nat.dvd_antisymm`,
+the one specifically for the natural numbers.
+You can use `_root_.dvd_antisymm` to specify the generic one;
+either one will work.

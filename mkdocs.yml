@@ -23,6 +23,7 @@ theme:
 plugins:
   - search:
       lang: zh
+  - autorefs
   - minify:
       minify_html: true
       docs_structure: folder
