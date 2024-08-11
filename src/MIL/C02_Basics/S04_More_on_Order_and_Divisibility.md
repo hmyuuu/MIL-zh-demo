@@ -165,11 +165,8 @@ example : |a| - |b| ≤ |a - b| :=
 end
 ```
 
-/- TEXT:
 See if you can do this in three lines or less.
 You can use the theorem `sub_add_cancel`.
-
-.. index:: divisibility
 
 Another important relation that we will make use of
 in the sections to come is the divisibility relation
@@ -180,10 +177,6 @@ Rather, it is a unicode character obtained by
 typing `\|` in VS Code.
 By convention, Mathlib uses `dvd`
 to refer to it in theorem names.
-TEXT. -/
--- BOTH:
-section
-variable (w x y z : ℕ)
 
 ```lean
 example (h₀ : x ∣ y) (h₁ : y ∣ z) : x ∣ z :=
@@ -197,45 +190,24 @@ example : x ∣ x ^ 2 := by
   apply dvd_mul_left
 ```
 
-/- TEXT:
 In the last example, the exponent is a natural
 number, and applying `dvd_mul_left`
 forces Lean to expand the definition of `x^2` to
 `x^1 * x`.
 See if you can guess the names of the theorems
 you need to prove the following:
-TEXT. -/
 
 ```lean
--- BOTH:
 example (h : x ∣ w) : x ∣ y * (x * z) + x ^ 2 + w ^ 2 := by
-/- EXAMPLES:
   sorry
-SOLUTIONS: -/
-  apply dvd_add
-  · apply dvd_add
-    · apply dvd_mul_of_dvd_right
-      apply dvd_mul_right
-    apply dvd_mul_left
-  rw [pow_two]
-  apply dvd_mul_of_dvd_right
-  exact h
-
--- BOTH:
 end
 ```
-
-/- TEXT:
-.. index:: gcd, lcm
 
 With respect to divisibility, the _greatest common divisor_,
 `gcd`, and least common multiple, `lcm`,
 are analogous to `min` and `max`.
 Since every number divides `0`,
 `0` is really the greatest element with respect to divisibility:
-TEXT. -/
--- BOTH:
-section
 
 ```lean
 variable (m n : ℕ)
@@ -246,34 +218,17 @@ variable (m n : ℕ)
 #check (Nat.lcm_zero_left n : Nat.lcm 0 n = 0)
 ```
 
-/- TEXT:
 See if you can guess the names of the theorems you will need to
 prove the following:
-TEXT. -/
 
 ```lean
--- BOTH:
 example : Nat.gcd m n = Nat.gcd n m := by
-/- EXAMPLES:
   sorry
-SOLUTIONS: -/
-  apply Nat.dvd_antisymm
-  repeat
-    apply Nat.dvd_gcd
-    apply Nat.gcd_dvd_right
-    apply Nat.gcd_dvd_left
 ```
 
--- BOTH:
-end
-
-/- TEXT:
 Hint: you can use `dvd_antisymm`, but if you do, Lean will
 complain that the expression is ambiguous between the generic
 theorem and the version `Nat.dvd_antisymm`,
 the one specifically for the natural numbers.
 You can use `_root_.dvd_antisymm` to specify the generic one;
 either one will work.
-TEXT. -/
-
--- OMIT: fix this: protect `dvd_antisymm`.
