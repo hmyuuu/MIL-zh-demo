@@ -169,9 +169,6 @@ example : InjOn f s ↔ ∀ x₁ ∈ s, ∀ x₂ ∈ s, f x₁ = f x₂ → x₁
   Iff.refl _
 ```
 
--- BOTH:
-end
-
 The statement `Injective f` is provably equivalent
 to `InjOn f univ`.
 Similarly, the library defines `range f` to be
@@ -184,17 +181,13 @@ there are often relativized versions that restrict
 the statements to a subset of the domain type.
 
 Here is are some examples of `InjOn` and `range` in use:
-BOTH: -/
-section
 
 ```lean
 open Set Real
 
--- EXAMPLES:
 example : InjOn log { x | x > 0 } := by
   intro x xpos y ypos
   intro e
-  -- log x = log y
   calc
     x = exp (log x) := by rw [exp_log xpos]
     _ = exp (log y) := by rw [e]
@@ -211,7 +204,6 @@ example : range exp = { y | y > 0 } := by
 ```
 
 Try proving these:
-EXAMPLES: -/
 
 ```lean
 example : InjOn sqrt { x | x ≥ 0 } := by
@@ -226,49 +218,6 @@ example : sqrt '' { x | x ≥ 0 } = { y | y ≥ 0 } := by
 example : (range fun x ↦ x ^ 2) = { y : ℝ | y ≥ 0 } := by
   sorry
 ```
-
--- SOLUTIONS:
-example : InjOn sqrt { x | x ≥ 0 } := by
-intro x xnonneg y ynonneg
-intro e
-calc
-x = sqrt x ^ 2 := by rw [sq_sqrt xnonneg]
-_ = sqrt y ^ 2 := by rw [e]
-_ = y := by rw [sq_sqrt ynonneg]
-
-example : InjOn (fun x ↦ x ^ 2) { x : ℝ | x ≥ 0 } := by
-intro x xnonneg y ynonneg
-intro e
-dsimp at \*
-calc
-x = sqrt (x ^ 2) := by rw [sqrt_sq xnonneg]
-_ = sqrt (y ^ 2) := by rw [e]
-_ = y := by rw [sqrt_sq ynonneg]
-
-example : sqrt '' { x | x ≥ 0 } = { y | y ≥ 0 } := by
-ext y; constructor
-· rintro ⟨x, ⟨xnonneg, rfl⟩⟩
-apply sqrt_nonneg
-intro ynonneg
-use y ^ 2
-dsimp at \*
-constructor
-apply pow_nonneg ynonneg
-apply sqrt_sq
-assumption
-
-example : (range fun x ↦ x ^ 2) = { y : ℝ | y ≥ 0 } := by
-ext y
-constructor
-· rintro ⟨x, rfl⟩
-dsimp at \*
-apply pow_two_nonneg
-intro ynonneg
-use sqrt y
-exact sq_sqrt ynonneg
-
--- BOTH:
-end
 
 To define the inverse of a function `f : α → β`,
 we will use two new ingredients.
@@ -287,9 +236,6 @@ This requires an appeal to the _axiom of choice_.
 Lean allows various ways of accessing it;
 one convenient method is to use the classical `choose`
 operator, illustrated below.
-
--- BOTH:
-section
 
 ```lean
 variable {α β : Type*} [Inhabited α]
@@ -312,7 +258,6 @@ meets this specification.
 
 With these in hand, we can define the inverse function
 as follows:
-BOTH: -/
 
 ```lean
 noncomputable section
@@ -358,14 +303,12 @@ You should be able to prove each of them with about a half-dozen
 short lines.
 If you are looking for an extra challenge,
 try to condense each proof to a single-line proof term.
-BOTH: -/
 
 ```lean
 variable (f : α → β)
 
 open Function
 
--- EXAMPLES:
 example : Injective f ↔ LeftInverse (inverse f) f :=
   sorry
 
@@ -373,76 +316,11 @@ example : Surjective f ↔ RightInverse (inverse f) f :=
   sorry
 ```
 
--- SOLUTIONS:
-example : Injective f ↔ LeftInverse (inverse f) f := by
-constructor
-· intro h y
-apply h
-apply inverse_spec
-use y
-intro h x1 x2 e
-rw [← h x1, ← h x2, e]
-
-example : Injective f ↔ LeftInverse (inverse f) f :=
-⟨fun h y ↦ h (inverse*spec * ⟨y, rfl⟩), fun h x1 x2 e ↦ by rw [← h x1, ← h x2, e]⟩
-
-example : Surjective f ↔ RightInverse (inverse f) f := by
-constructor
-· intro h y
-apply inverse_spec
-apply h
-intro h y
-use inverse f y
-apply h
-
-example : Surjective f ↔ RightInverse (inverse f) f :=
-⟨fun h y ↦ inverse*spec * (h _), fun h y ↦ ⟨inverse f y, h _⟩⟩
-
--- BOTH:
-end
-
--- OMIT:
-/-
-.. TODO: These comments after this paragraph are from Patrick.
-.. We should decide whether we want to do this here.
-.. Another possibility is to wait until later.
-.. There may be good examples for the topology chapter,
-.. at which point, the reader will be more of an expert.
-
-.. This may be a good place to also introduce a discussion of the choose tactic, and explain why you choose (!) not to use it here.
-
-.. Typically, you can include:
-
-.. example {α β : Type\*} {f : α → β} : surjective f ↔ ∃ g : β → α, ∀ b, f (g b) = b :=
-.. begin
-.. split,
-.. { intro h,
-.. dsimp [surjective] at h, -- this line is optional
-.. choose g hg using h,
-.. use g,
-.. exact hg },
-.. { rintro ⟨g, hg⟩,
-.. intros b,
-.. use g b,
-.. exact hg b },
-.. end
-.. Then contrast this to a situation where we really want a def outputting an element or a function, maybe with a less artificial example than your inverse.
-
-.. We should also tie this to the "function are global" discussion, and the whole thread of deferring proofs to lemmas instead of definitions. There is a lot going on here, and all of it is crucial for formalization.
--/
-
 We close this section with a type-theoretic statement of Cantor's
 famous theorem that there is no surjective function from a set
 to its power set.
 See if you can understand the proof,
 and then fill in the two lines that are missing.
-
--- BOTH:
-section
-variable {α : Type\*}
-open Function
-
--- EXAMPLES:
 
 ```lean
 theorem Cantor : ∀ f : α → Set α, ¬Surjective f := by

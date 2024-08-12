@@ -1,5 +1,3 @@
-.. _number_theory:
-
 # Elementary Number Theory
 
 In this chapter, we show you how to formalize some elementary
