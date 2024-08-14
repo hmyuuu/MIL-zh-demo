@@ -77,6 +77,9 @@ extra:
     alias: true
 
 nav:
-  - 目录: index.md
-  - Introduction: ./MIL/C01_Introduction.md
-  - Basics: ./MIL/C02_Basics.md
+  - 目录: ./en/index.md
+  - Introduction: ./en/C01_Introduction.md
+  - Basics: ./en/C02_Basics.md
+  - Logic: ./en/C03_Logic.md
+  - Sets and Functions: ./en/C04_Sets_and_Functions.md
+  - Elementary Number Theory: ./en/C05_Elementary_Number_Theory.md
