@@ -3,4 +3,5 @@ mkdocs-material
 mkdocs-awesome-pages-plugin
 mkdocs-minify-plugin
 mkdocs-redirects
+mkdocs-autorefs
 mike

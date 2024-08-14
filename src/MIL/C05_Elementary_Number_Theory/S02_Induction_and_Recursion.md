@@ -7,8 +7,6 @@ Lean's foundation allows us to declare _inductive types_,
 which are types generated inductively by a given list of
 _constructors_.
 In Lean, the natural numbers are declared as follows.
-OMIT: -/
-namespace hidden
 
 ```
 inductive Nat
@@ -16,9 +14,6 @@ inductive Nat
   | succ (n : Nat) : Nat
 ```
 
-end hidden
-
-/- TEXT:
 You can find this in the library by writing `#check Nat` and
 then using `ctrl-click` on the identifier `Nat`.
 The command specifies that `Nat` is the datatype generated
@@ -31,7 +26,6 @@ representations, but we don't have to worry about the details of that now.)
 What "freely" means for the working mathematician is that the type
 `Nat` has an element `zero` and an injective successor function
 `succ` whose image does not include `zero`.
-EXAMPLES: -/
 
 ```
 example (n : Nat) : n.succ ≠ Nat.zero :=
@@ -41,7 +35,6 @@ example (m n : Nat) (h : m.succ = n.succ) : m = n :=
   Nat.succ.inj h
 ```
 
-/- TEXT:
 What the word "inductively" means for the working mathematician is that
 the natural numbers comes with a principle of proof by induction
 and a principle of definition by recursion.
@@ -49,7 +42,6 @@ This section will show you how to use these.
 
 Here is an example of a recursive definition of the factorial
 function.
-BOTH: -/
 
 ```
 def fac : ℕ → ℕ
@@ -57,14 +49,12 @@ def fac : ℕ → ℕ
   | n + 1 => (n + 1) * fac n
 ```
 
-/- TEXT:
 The syntax takes some getting used to.
 Notice that there is no `:=` on the first line.
 The next two lines provide the base case and inductive step
 for a recursive definition.
 These equations hold definitionally, but they can also
 be used manually by giving the name `fac` to `simp` or `rw`.
-EXAMPLES: -/
 
 ```
 example : fac 0 = 1 :=
@@ -86,7 +76,6 @@ example (n : ℕ) : fac (n + 1) = (n + 1) * fac n := by
   simp [fac]
 ```
 
-/- TEXT:
 The factorial function is actually already defined in Mathlib as
 `Nat.factorial`. Once again, you can jump to it by typing
 `#check Nat.factorial` and using `ctrl-click.`
@@ -98,8 +87,8 @@ that the simplifier uses by default.
 
 The principle of induction says that we can prove a general statement
 about the natural numbers by proving that the statement holds of 0
-and that whenever it holds of a natural number $n`,
-it also holds of $n + 1`.
+and that whenever it holds of a natural number $n$,
+it also holds of $n + 1$.
 The line `induction' n with n ih` in the proof
 below therefore results in two goals:
 in the first we need to prove `0 < fac 0`,
@@ -108,7 +97,6 @@ and a required to prove `0 < fac (n + 1)`.
 The phrase `with n ih` serves to name the variable and
 the assumption for the inductive hypothesis,
 and you can choose whatever names you want for them.
-EXAMPLES: -/
 
 ```
 theorem fac_pos (n : ℕ) : 0 < fac n := by
@@ -119,12 +107,10 @@ theorem fac_pos (n : ℕ) : 0 < fac n := by
   exact mul_pos n.succ_pos ih
 ```
 
-/- TEXT:
 The `induction` tactic is smart enough to include hypotheses
 that depend on the induction variable as part of the
 induction hypothesis.
 Step through the next example to see what is going on.
-EXAMPLES: -/
 
 ```
 theorem dvd_fac {i n : ℕ} (ipos : 0 < i) (ile : i ≤ n) : i ∣ fac n := by
@@ -137,7 +123,6 @@ theorem dvd_fac {i n : ℕ} (ipos : 0 < i) (ile : i ≤ n) : i ∣ fac n := by
   apply dvd_mul_right
 ```
 
-/- TEXT:
 The following example provides a crude lower bound for the factorial
 function.
 It turns out to be easier to start with a proof by cases,
