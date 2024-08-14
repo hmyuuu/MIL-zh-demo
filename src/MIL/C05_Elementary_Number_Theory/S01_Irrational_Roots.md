@@ -138,46 +138,20 @@ See if you can fill out the proof sketch, using
 example {m n : ℕ} (coprime_mn : m.Coprime n) : m ^ 2 ≠ 2 * n ^ 2 := by
   intro sqr_eq
   have : 2 ∣ m := by
-/- EXAMPLES:
     sorry
-SOLUTIONS: -/
-    apply even_of_even_sqr
-    rw [sqr_eq]
-    apply dvd_mul_right
--- BOTH:
   obtain ⟨k, meq⟩ := dvd_iff_exists_eq_mul_left.mp this
   have : 2 * (2 * k ^ 2) = 2 * n ^ 2 := by
     rw [← sqr_eq, meq]
     ring
   have : 2 * k ^ 2 = n ^ 2 :=
-/- EXAMPLES:
     sorry
-SOLUTIONS: -/
-    (mul_right_inj' (by norm_num)).mp this
--- BOTH:
   have : 2 ∣ n := by
-/- EXAMPLES:
     sorry
-SOLUTIONS: -/
-    apply even_of_even_sqr
-    rw [← this]
-    apply dvd_mul_right
--- BOTH:
   have : 2 ∣ m.gcd n := by
-/- EXAMPLES:
     sorry
-SOLUTIONS: -/
-    apply Nat.dvd_gcd <;>
-    assumption
--- BOTH:
   have : 2 ∣ 1 := by
-/- EXAMPLES:
     sorry
-SOLUTIONS: -/
     convert this
-    symm
-    exact coprime_mn
--- BOTH:
   norm_num at this
 ```
 
@@ -188,49 +162,19 @@ At the end of the proof, you'll need to derive a contradiction from
 You can use `Nat.Prime.two_le`, which says that
 any prime number is greater than or equal to two,
 and `Nat.le_of_dvd`.
-BOTH: -/
 
 ```lean
 example {m n p : ℕ} (coprime_mn : m.Coprime n) (prime_p : p.Prime) : m ^ 2 ≠ p * n ^ 2 := by
-/- EXAMPLES:
   sorry
-SOLUTIONS: -/
-  intro sqr_eq
-  have : p ∣ m := by
-    apply prime_p.dvd_of_dvd_pow
-    rw [sqr_eq]
-    apply dvd_mul_right
-  obtain ⟨k, meq⟩ := dvd_iff_exists_eq_mul_left.mp this
-  have : p * (p * k ^ 2) = p * n ^ 2 := by
-    rw [← sqr_eq, meq]
-    ring
-  have : p * k ^ 2 = n ^ 2 := by
-    apply (mul_right_inj' _).mp this
-    exact prime_p.ne_zero
-  have : p ∣ n := by
-    apply prime_p.dvd_of_dvd_pow
-    rw [← this]
-    apply dvd_mul_right
-  have : p ∣ Nat.gcd m n := by apply Nat.dvd_gcd <;> assumption
-  have : p ∣ 1 := by
-    convert this
-    symm
-    exact coprime_mn
-  have : 2 ≤ 1 := by
-    apply prime_p.two_le.trans
-    exact Nat.le_of_dvd zero_lt_one this
-  norm_num at this
 ```
-
--- BOTH:
 
 Let us consider another approach.
 Here is a quick proof that if $p$ is prime, then
-$m^2 \ne p n^2`: if we assume :math:`m^2 = p n^2$
+$m^2 \ne p n^2$: if we assume $m^2 = p n^2$
 and consider the factorization of $m` and :math:`n$ into primes,
 then $p$ occurs an even number of times on the left side of the equation
 and an odd number of times on the right, a contradiction.
-Note that this argument requires that $n` and hence :math:`m$
+Note that this argument requires that $n$ and hence $m$
 are not equal to zero.
 The formalization below confirms that this assumption is sufficient.
 
@@ -244,7 +188,6 @@ are prime, that any `n` greater than zero is equal to the
 product of its factors,
 and that if `n` is equal to the product of another list of prime numbers,
 then that list is a permutation of `Nat.factors n`.
-EXAMPLES: -/
 
 ```lean
 #check Nat.factors
@@ -261,7 +204,6 @@ that represents the same data as a function.
 Specifically, `Nat.factorization n p`, which we can also write
 `n.factorization p`, returns the multiplicity of `p` in the prime
 factorization of `n`. We will use the following three facts.
-BOTH: -/
 
 ```lean
 theorem factorization_mul' {m n : ℕ} (mnez : m ≠ 0) (nnez : n ≠ 0) (p : ℕ) :
@@ -291,25 +233,15 @@ followed by `assumption`.
 
 See if you can use the identities above to fill in the missing parts
 of the proof.
-BOTH: -/
 
 ```lean
 example {m n p : ℕ} (nnz : n ≠ 0) (prime_p : p.Prime) : m ^ 2 ≠ p * n ^ 2 := by
   intro sqr_eq
   have nsqr_nez : n ^ 2 ≠ 0 := by simpa
   have eq1 : Nat.factorization (m ^ 2) p = 2 * m.factorization p := by
-/- EXAMPLES:
     sorry
-SOLUTIONS: -/
-    rw [factorization_pow']
--- BOTH:
   have eq2 : (p * n ^ 2).factorization p = 2 * n.factorization p + 1 := by
-/- EXAMPLES:
     sorry
-SOLUTIONS: -/
-    rw [factorization_mul' prime_p.ne_zero nsqr_nez, prime_p.factorization', factorization_pow',
-      add_comm]
--- BOTH:
   have : 2 * m.factorization p % 2 = (2 * n.factorization p + 1) % 2 := by
     rw [← eq1, sqr_eq, eq2]
   rw [add_comm, Nat.add_mul_mod_self_left, Nat.mul_mod_right] at this
@@ -344,7 +276,6 @@ to finish it off.
 Note that this example does not assume that `p` is prime, but the
 conclusion is trivial when `p` is not prime since `r.factorization p`
 is then zero by definition, and the proof works in all cases anyway.
-BOTH: -/
 
 ```lean
 example {m n k r : ℕ} (nnz : n ≠ 0) (pow_eq : m ^ k = r * n ^ k) {p : ℕ} :
@@ -353,27 +284,14 @@ example {m n k r : ℕ} (nnz : n ≠ 0) (pow_eq : m ^ k = r * n ^ k) {p : ℕ} :
   · simp
   have npow_nz : n ^ k ≠ 0 := fun npowz ↦ nnz (pow_eq_zero npowz)
   have eq1 : (m ^ k).factorization p = k * m.factorization p := by
-/- EXAMPLES:
     sorry
-SOLUTIONS: -/
-    rw [factorization_pow']
--- BOTH:
   have eq2 : ((r + 1) * n ^ k).factorization p =
       k * n.factorization p + (r + 1).factorization p := by
-/- EXAMPLES:
     sorry
-SOLUTIONS: -/
-    rw [factorization_mul' r.succ_ne_zero npow_nz, factorization_pow', add_comm]
--- BOTH:
   have : r.succ.factorization p = k * m.factorization p - k * n.factorization p := by
     rw [← eq1, pow_eq, eq2, add_comm, Nat.add_sub_cancel]
   rw [this]
-/- EXAMPLES:
   sorry
-SOLUTIONS: -/
-  apply Nat.dvd_sub' <;>
-  apply Nat.dvd_mul_right
--- BOTH:
 ```
 
 There are a number of ways in which we might want to improve on these results.
@@ -416,36 +334,3 @@ and that it takes values in the extended natural numbers `enat`,
 which adds the value infinity to the natural numbers.
 In the next chapter, we will begin to develop the means to
 appreciate the way that Lean supports this sort of generality.
-EXAMPLES: -/
-#check multiplicity
-
--- OMIT: TODO: add when available
--- #check irrational_nrt_of_n_not_dvd_multiplicity
-
--- #check irrational_sqrt_two
-
--- OMIT:
--- TODO: use this in the later section and then delete here.
-#check Rat.num
-#check Rat.den
-
-section
-variable (r : ℚ)
-
-#check r.num
-#check r.den
-#check r.pos
-#check r.reduced
-
-end
-
--- example (r : ℚ) : r ^ 2 ≠ 2 := by
--- rw [← r.num_div_denom, div_pow]
--- have : (r.denom : ℚ) ^ 2 > 0 := by
--- norm_cast
--- apply pow_pos r.pos
--- have := Ne.symm (ne_of_lt this)
--- intro h
--- field_simp [this] at h
--- norm_cast at h
--- sorry
