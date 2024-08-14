@@ -27,15 +27,15 @@ plugins:
   - minify:
       minify_html: true
       docs_structure: folder
-  - i18n:
-      languages:
-        - locale: en
-          name: English
-          default: true
-          build: true
-        - locale: zh
-          name: 中文
-          build: true
+  # - i18n:
+  #     languages:
+  #       - locale: en
+  #         name: English
+  #         default: true
+  #         build: true
+  # - locale: zh
+  #   name: 中文
+  #   build: true
 
 markdown_extensions:
   - admonition
